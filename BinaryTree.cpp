@@ -1,13 +1,23 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
+
 // -Program Summary:
 // 
-//  This program will add numerical data only from a user-provided file to a binary tree. The
-//  numerical values added will only be between 0 - 99. The program will filter out for any garbage
-//  items in the file such as characters or anything else. Each number found will be inserted into
-//  the tree, iterating either left or right depending on the value of the inserted node. Depth counters
-//  will be assigned to each node created. Once tree is fully populated, the items in tree will be 
-//  written to a file in low-high order by iterating to bottom of tree for lowest values first &
-//  gradually returning the node greater than itself until reaching max value.
+//  This program will seek to insert numerical data from an unsorted file. Data found in file must be numeric and within 0-99.
+//  Will filter data in file for garbage items/non-numeric values.
+//  Inserts numbers found in file into tree by iterating left or right, comparing values of proximal nodes. 
+//  ->left nodes will be values less than insertion value, ->right nodes will be greater 
+//  Once empty location is found, inserts node at that location. 
+//  For each node created, it's corresponding depth counter is assigned. 
+//
+//  After populating tree, will write data to file in low-high order. 
+//  To traverse tree leftward, program will pass nodes to tree recursively. 
+//  Recursive logic will pass ea. node's ->right into function to access its ->left node's data.
+//  Since left-ward values are lowest, data will be sorted throughout traversal.
+//
+//  Each node's value throughout traversal will be written to file (tree.txt) in current dir. 
+//
+//  Justin C. Shows
+//  20201105
 //
 //  Justin C. Shows
 //  20201105
@@ -26,17 +36,19 @@ struct node
     node* right;
 };
 
+//  Inserts node at vacant location
 struct node*& insert(node*&, int, int);
-struct node* readFile(ifstream&, node*&);
+
+//  Read from unsorted file for #'s (0-99 only)
+int readFile(ifstream&, node*&);
 
 //  Prompt user for filename if not passed: 
 string getFile();
 
-//  Files
+//   Check if string is only a number:
 bool isOnlyDigits(const string&);
 
-int readFile(ifstream&);
-
+//   Traverse tree leftward recursively
 void inOrder(struct node*, ofstream&);
 
 //  Files to read & write from:
@@ -83,11 +95,11 @@ int main(int argc, char* argv[])
 
 //  Traverse populated tree low-high:
     
-    writeFile << "[Data from Binary Tree in Lowest to High:] " << endl;
+    writeFile << "Data " << "\t" << "Level" << endl << endl;
 
     inOrder(Root, writeFile);
 
-    cout << "Data written to file (tree.txt) " << endl;
+    cout << endl << "Data written to file (tree.txt). " << endl;
 
 //  Finished w/ file: 
 
@@ -117,6 +129,7 @@ string getFile()
     return userInput;
 }
 
+//   Compares '< or >' for ea. node & the insertion value. Inserts at empty location:  
 struct node*& insert(node*& Root, int data, int counter)
 {
 //  Base case is vacant node location after traversal
@@ -148,13 +161,12 @@ struct node*& insert(node*& Root, int data, int counter)
         }
     }
 
-//  Once moving up, decrement depth counter
     counter--;
     return Root;
 }
 
-//     Grabs each file value, checks for numbers 0-99 only & inserts them to tree:
-struct node* readFile(ifstream& readFile, node *&Root)
+//   Grabs each file value, checks for numbers 0-99 only & inserts them to tree:
+int readFile(ifstream& readFile, node *&Root)
 {
     if (readFile.is_open() == false) { cout << "Could not open or find file. " << endl; exit(1); }
 
@@ -185,10 +197,11 @@ struct node* readFile(ifstream& readFile, node *&Root)
              }
         }
     }
-    return Root;
+    
+    return 0;
 }
 
-//   Write each node's value by calling itself, passing in each node's ->left & ->right 
+//   Traverses tree leftward by passing each node's ->right in function to access it's left node: 
 void inOrder(struct node* Root, ofstream& writeFile)
 {
     if (Root)
